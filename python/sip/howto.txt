@@ -1,0 +1,4 @@
+sip-sdist
+pip install fast_tree-0.1.tar.gz
+Notes:
+- TMPDIR must be ASCII
