@@ -27,13 +27,14 @@ body {
 .content {
 	position: relative;
 	width: 100%;
+	overflow-x: hidden;
 }
 
 .row {
 	position: absolute;
     padding: 8px;
 	cursor: pointer;
-	width: calc(100% - 16px);
+	width: 100%;
 	display: flex;
 	align-items: center;
 	gap: 8px;
