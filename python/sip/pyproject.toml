@@ -1,6 +1,29 @@
 [build-system]
-requires = ["sip >=6, <7"]
+requires = ["sip==6.8.1"]
 build-backend = "sipbuild.api"
 
-[tool.sip.metadata]
-name = "fast_tree"
+[project]
+name = "fast-tree"
+version = "1.0.0"
+authors = [
+  { name="Alexandr Gusev", email="alphacity@yandex.ru" },
+]
+description = "Utility class for fast partial rendering of large trees"
+readme = "README.md"
+license = { text = "MIT" }
+keywords = [
+    "fast",
+    "partial",
+    "rendering",
+    "large",
+    "tree"
+]
+requires-python = ">=3.9.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Alexandr-Gusev/fast-tree"
