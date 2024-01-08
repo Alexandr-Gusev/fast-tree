@@ -5,7 +5,10 @@ __pycache__
 node_modules
 package-lock.json
 
-python/sip/build
-python/sip/*.tar.gz
+python/fast-tree-utils/build
+python/fast-tree-utils/*.tar.gz
+
+python/fast-tree/dist
+python/fast-tree/fast_tree.egg-info
 
 cpp/build

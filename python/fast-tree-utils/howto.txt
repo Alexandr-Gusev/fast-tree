@@ -1,5 +1,0 @@
-sip-sdist
-pip uninstall fast-tree -y
-pip install fast_tree-X.Y.Z.tar.gz
-Notes:
-- TMPDIR must be ASCII

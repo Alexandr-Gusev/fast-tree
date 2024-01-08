@@ -1,4 +1,4 @@
-%Module(name=fast_tree, language="C++")
+%Module(name=fast_tree_utils, language="C++")
 
 %ModuleCode
 #include <string.h>

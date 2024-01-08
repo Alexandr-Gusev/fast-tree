@@ -1,14 +1,14 @@
 [build-system]
-requires = ["sip==6.8.1"]
-build-backend = "sipbuild.api"
+requires = ["setuptools>=58.1.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "fast-tree-utils"
+name = "fast-tree"
 version = "1.0.0"
 authors = [
   { name="Alexandr Gusev", email="alphacity@yandex.ru" },
 ]
-description = "Part of fast-tree package"
+description = "Utility class for fast partial rendering of large trees"
 readme = "README.md"
 license = { text = "MIT" }
 keywords = [
@@ -17,6 +17,9 @@ keywords = [
     "rendering",
     "large",
     "tree"
+]
+dependencies = [
+    "fast-tree-utils == 1.0.0"
 ]
 requires-python = ">=3.9.9"
 classifiers = [

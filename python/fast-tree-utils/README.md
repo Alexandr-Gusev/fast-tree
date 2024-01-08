@@ -1,5 +1,5 @@
-# Fast tree
+# Fast tree utils
 
-Utility class for fast partial rendering of large trees.
+Part of fast-tree package.
 
 WORK IN PROGRESS
