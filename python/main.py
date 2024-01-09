@@ -2,7 +2,6 @@ import argparse
 import os
 import sys
 from aiohttp import web
-import json
 import asyncio
 import time
 
@@ -23,7 +22,7 @@ async def get_block(all_rows, count, start, query):
     query = query.lower()
 
     if args.fast:
-        return fast_tree.get_block(all_rows, all_tags, count, start, query)
+        return fast_tree_utils.get_block(all_rows, all_tags, count, start, query)
 
     rows = []
     total = 0
@@ -70,7 +69,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.fast:
-        import fast_tree
+        import fast_tree_utils
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(server_init())

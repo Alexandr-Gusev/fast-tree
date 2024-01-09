@@ -14,8 +14,10 @@ python -m build
 -------------------------------------------------------------------------------
 Test
 -------------------------------------------------------------------------------
+pip uninstall fast-tree-utils -y
 pip uninstall fast-tree -y
-pip install fast_tree-X.Y.Z.tar.gz
+pip install fast_tree_utils-X.Y.Z.tar.gz
+pip install fast-tree-X.Y.Z.tar.gz
 Notes:
 - TMPDIR must be ASCII
 -------------------------------------------------------------------------------
