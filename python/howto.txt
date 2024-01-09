@@ -1,27 +1,30 @@
 -------------------------------------------------------------------------------
 Build fast-tree-utils
 -------------------------------------------------------------------------------
-pip install --upgrade sip==6.8.1
+pip install sip==6.8.1
 
 sip-sdist
 -------------------------------------------------------------------------------
 Build fast-tree
 -------------------------------------------------------------------------------
-pip install --upgrade build
-pip install --upgrade twine
+pip install build
+pip install twine
 
 python -m build
 -------------------------------------------------------------------------------
 Test
 -------------------------------------------------------------------------------
-pip uninstall fast-tree-utils -y
-pip uninstall fast-tree -y
-pip install fast_tree_utils-X.Y.Z.tar.gz
-pip install fast-tree-X.Y.Z.tar.gz
+pip install pytest
+
+pip install --force-reinstall fast_tree_utils-X.Y.Z.tar.gz
+pip install --force-reinstall fast-tree-X.Y.Z.tar.gz
+
+python -m pytest python/fast-tree/src/fast_tree/tests
+
 Notes:
 - TMPDIR must be ASCII
 -------------------------------------------------------------------------------
 Upload
 -------------------------------------------------------------------------------
-python -m twine upload fast_tree_utils-X.Y.Z.tar.gz -u__token__ -p***
-python -m twine upload dist/* -u__token__ -p***
+python -m twine upload python/fast-tree-utils/fast_tree_utils-X.Y.Z.tar.gz -u__token__ -p***
+python -m twine upload python/fast-tree/dist/* -u__token__ -p***

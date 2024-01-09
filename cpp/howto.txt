@@ -1,9 +1,10 @@
 cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release
 cmake --build build
+
 Notes for Visual Studio Code:
 - use CMake Tools with settings file like this
 {
     "cmake.sourceDirectory": "${workspaceFolder}/cpp",
     "cmake.buildDirectory": "${workspaceFolder}/cpp/build"
 }
-- use Ctrl + F5 to build and execute
+- use status bar to build and execute
