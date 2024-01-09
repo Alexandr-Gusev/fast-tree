@@ -4,33 +4,33 @@
 #include <chrono>
 
 struct Row {
-    std::string guid;
+    std::string id;
     std::string name;
-    std::string tags;
+    std::string key_for_search;
 };
 
 void main(void) {
-    std::vector<Row> all_rows;
+    std::vector<Row> rows;
     for (int i = 1; i <= 250000; i++) {
         const auto s = std::to_string(i);
-        all_rows.push_back({
+        rows.push_back({
             s,
             "Row " + s,
             "row " + s
         });
     }
 
-    const int count = 11;
-    const int start = 0;
+    const int block_size = 11;
+    const int block_start = 0;
     const std::string query = "";
 
     auto t = std::chrono::steady_clock::now();
-    std::vector<Row*> block;
+    std::vector<Row*> block_rows;
     int total = 0;
-    for (auto& row : all_rows) {
-        if (query.empty() || row.tags.find(query) != std::string::npos) {
-            if (total >= start && block.size() < count) {
-                block.push_back(&row);
+    for (auto& row : rows) {
+        if (query.empty() || row.key_for_search.find(query) != std::string::npos) {
+            if (total >= block_start && block_rows.size() < block_size) {
+                block_rows.push_back(&row);
             }
             total++;
         }

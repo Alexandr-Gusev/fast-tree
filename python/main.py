@@ -6,32 +6,31 @@ import asyncio
 import time
 
 
-all_rows = [
+rows = [
     {
-        "guid": str(i),
-        "name": "Row %d" % i,
-        "tags": "row %d" % i
+        "id": str(i),
+        "name": "Row %d" % i
     }
     for i in range(1, 250000 + 1)
 ]
 
-all_tags = [row["tags"] for row in all_rows]
+keys_for_search = [row["name"].lower() for row in rows]
 
 
-async def get_block(all_rows, count, start, query):
+async def get_block(rows, block_size, block_start, query):
     query = query.lower()
 
     if args.fast:
-        return fast_tree_utils.get_block(all_rows, all_tags, count, start, query)
+        return fast_tree_utils.get_block(rows, keys_for_search, block_size, block_start, query)
 
-    rows = []
+    block_rows = []
     total = 0
-    for row in all_rows:
-        if query == "" or row["tags"].find(query) != -1:
-            if total >= start and len(rows) < count:
-                rows.append(row)
+    for i, row in enumerate(rows):
+        if query == "" or keys_for_search[i].find(query) != -1:
+            if total >= block_start and len(block_rows) < block_size:
+                block_rows.append(row)
             total += 1
-    return {"rows": rows, "total": total}
+    return {"rows": block_rows, "total": total}
 
 
 async def index_handler(request):
@@ -41,7 +40,7 @@ async def index_handler(request):
 async def get_block_handler(request):
     data = await request.json()
     t = time.time()
-    block = await get_block(all_rows, data.get("count"), data["start"], data.get("query"))
+    block = await get_block(rows, data.get("block_size"), data["block_start"], data.get("query"))
     print("dt: %d ms" % int((time.time() - t) * 1000))
     return web.json_response(block)
 

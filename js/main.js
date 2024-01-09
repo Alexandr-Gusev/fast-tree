@@ -8,36 +8,36 @@ commander
 	.parse();
 const opts = commander.opts();
 
-const allRows = [];
+const rows = [];
 let i = 1;
 while (i <= 250000) {
-	allRows.push({
-		"guid": `${i}`,
-		"name": `Row ${i}`,
-		"tags": `row ${i}`
+	rows.push({
+		id: `${i}`,
+		name: `Row ${i}`,
+		keyForSearch: `row ${i}`
 	});
 	i += 1;
 }
 
-const getBlock = async (allRows, count, start, query) => {
+const getBlock = async (rows, blockSize, blockStart, query) => {
 	query = query.toLowerCase();
-	const rows = [];
+	const blockRows = [];
 	let total = 0;
-	for (const row of allRows) {
-		if (query === "" || row.tags.indexOf(query) != -1) {
-			if (total >= start && rows.length < count) {
-				rows.push(row);
+	for (const row of rows) {
+		if (query === "" || row.keyForSearch.indexOf(query) != -1) {
+			if (total >= blockStart && blockRows.length < blockSize) {
+				blockRows.push(row);
 			}
 			total += 1;
 		}
 	}
-	return {rows, total};
+	return {rows: blockRows, total};
 };
 
 const getBlockHandler = async (req, res) => {
-	let {count, start, query} = req.body;
+	let {block_size: blockSize, block_start: blockStart, query} = req.body;
 	const t = new Date().getTime();
-	block = await getBlock(allRows, count, start, query)
+	block = await getBlock(rows, blockSize, blockStart, query)
 	console.log("dt: " + (new Date().getTime() - t) + " ms");
 	return res.json(block);
 };

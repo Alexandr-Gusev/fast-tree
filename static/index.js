@@ -6,11 +6,11 @@ const SearchIcon = ({...props}) => <Icon {...props}>search</Icon>;
 const CloseIcon = ({...props}) => <Icon {...props}>close</Icon>;
 const TextSnippetIcon  = ({...props}) => <Icon {...props}>text_snippet</Icon>;
 
-const getBlock = async (count, start, query) => {
+const getBlock = async (blockSize, blockStart, query) => {
 	try {
 		const response = await axios.post(
 			"/get-block",
-			{count, start, query}
+			{block_size: blockSize, block_start: blockStart, query}
 		);
 		return response.data;
 	} catch (error) {
@@ -19,17 +19,17 @@ const getBlock = async (count, start, query) => {
 	}
 };
 
-const fetch = async (count, start, query, onResult) => {
-	const data = await getBlock(count, start, query);
+const fetch = async (blockSize, blockStart, query, onResult) => {
+	const data = await getBlock(blockSize, blockStart, query);
 	onResult(data);
 };
 
 const fetchWithDelay = debounce(fetch, 250);
 
 const List = ({width, height, rowHeight}) =>  {
-	const count = Math.ceil(height / rowHeight) + 1;
+	const blockSize = Math.ceil(height / rowHeight) + 1;
 
-	const [start, setStart] = useState(0);
+	const [blockStart, setBlockStart] = useState(0);
 	const [query, setQuery] = useState("");
 	const [rows, setRows] = useState([]);
 	const [total, setTotal] = useState(0);
@@ -45,13 +45,13 @@ const List = ({width, height, rowHeight}) =>  {
 			}
 			setRows(data.rows);
 			setTotal(data.total);
-			setWindowTop(start * rowHeight);
+			setWindowTop(blockStart * rowHeight);
 		};
-		fetchWithDelay(count, start, query, onResult);
-	}, [count, start, query, setRows, setTotal, setWindowTop, promptsCount]);
+		fetchWithDelay(blockSize, blockStart, query, onResult);
+	}, [blockSize, blockStart, query, setRows, setTotal, setWindowTop, promptsCount]);
 
 	const onScroll = e => {
-		setStart(Math.floor(e.currentTarget.scrollTop / rowHeight));
+		setBlockStart(Math.floor(e.currentTarget.scrollTop / rowHeight));
 	};
 
 	const contentHeight = total * rowHeight;
@@ -63,7 +63,7 @@ const List = ({width, height, rowHeight}) =>  {
 					size="small"
 					color="primary"
 					onClick={() => {
-						setStart(0);
+						setBlockStart(0);
 						setPromptsCount(promptsCount + 1)
 						ref.current.scrollTop = 0;
 					}}
@@ -76,7 +76,7 @@ const List = ({width, height, rowHeight}) =>  {
 					variant="outlined"
 					value={query}
 					onChange={e => {
-						setStart(0);
+						setBlockStart(0);
 						setQuery(e.target.value)
 						setPromptsCount(promptsCount + 1)
 						ref.current.scrollTop = 0;
@@ -86,7 +86,7 @@ const List = ({width, height, rowHeight}) =>  {
 					size="small"
 					color="primary"
 					onClick={() => {
-						setStart(0);
+						setBlockStart(0);
 						setQuery("");
 						setPromptsCount(promptsCount + 1)
 						ref.current.scrollTop = 0;
@@ -99,7 +99,7 @@ const List = ({width, height, rowHeight}) =>  {
 				<div className="content" style={{height: `${contentHeight}px`}}>
 					{rows.map(
 						(row, index) => (
-							<div key={row.guid} className="row" style={{top: `${windowTop + index * rowHeight}px`}}>
+							<div key={row.id} className="row" style={{top: `${windowTop + index * rowHeight}px`}}>
 								<TextSnippetIcon color="primary" />{row.name}
 							</div>
 						)
