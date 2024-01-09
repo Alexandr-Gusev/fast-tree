@@ -4,7 +4,7 @@ from bisect import bisect
 from fast_tree_utils import get_block
 
 
-class ObservableDict(MutableMapping):
+class FastTreeDict(MutableMapping):
     def __init__(self, add, remove, data):
         super(self.__class__, self).__init__()
         self.__add = lambda container, key, value: value
@@ -39,8 +39,8 @@ class FastTree(object):
 
         self.__mutex = Lock()
 
-        self.__items = ObservableDict(self.__add, self.__remove, {})
-        self.__groups = ObservableDict(self.__add, self.__remove, {})
+        self.__items = FastTreeDict(self.__add, self.__remove, {})
+        self.__groups = FastTreeDict(self.__add, self.__remove, {})
 
         self.__rows = []
         self.__keys_for_sorting = []
@@ -65,7 +65,7 @@ class FastTree(object):
             index = bisect(self.__keys_for_sorting, key_for_sorting)
             self.__index_by_key[key] = index
 
-            item = value if isinstance(value, ObservableDict) else ObservableDict(self.__edit, self.__edit, value)
+            item = value if isinstance(value, FastTreeDict) else FastTreeDict(self.__edit, self.__edit, value)
 
             self.__rows.insert(index, item)
             self.__keys_for_sorting.insert(index, key_for_sorting)
