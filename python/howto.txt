@@ -19,7 +19,7 @@ pip install pytest
 pip install --force-reinstall fast_tree_utils-X.Y.Z.tar.gz
 pip install --force-reinstall fast-tree-X.Y.Z.tar.gz
 
-python -m pytest python/fast-tree/src/fast_tree/tests
+python -m pytest python/fast-tree/fast_tree/tests
 
 Notes:
 - TMPDIR must be ASCII
