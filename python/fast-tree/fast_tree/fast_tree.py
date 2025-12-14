@@ -30,17 +30,27 @@ class FastTreeDict(MutableMapping):
 
 
 class FastTree(object):
-    def __init__(self, key, key_for_sorting, key_for_search):
+    def __init__(self, key_property, group_key_property, key_for_sorting, key_for_search):
         super(self.__class__, self).__init__()
 
-        self.__key = key
+        self.__key_property = key_property
+        self.__group_key_property = group_key_property
         self.__key_for_sorting = key_for_sorting
         self.__key_for_search = key_for_search
 
+        self.__key_for_sorting_items = self.__create_key_for_sorting(False)
+        self.__key_for_sorting_groups = self.__create_key_for_sorting(True)
+
+        self.__add_item = self.__create_add(False)
+        self.__add_group = self.__create_add(True)
+
+        self.__remove_item = self.__create_remove(False)
+        self.__remove_group = self.__create_remove(True)
+
         self.__mutex = Lock()
 
-        self.__items = FastTreeDict(self.__add, self.__remove, {})
-        self.__groups = FastTreeDict(self.__add, self.__remove, {})
+        self.__items = FastTreeDict(self.__add_item, self.__remove_item, {})
+        self.__groups = FastTreeDict(self.__add_group, self.__remove_group, {})
 
         self.__rows = []
         self.__keys_for_sorting = []
@@ -48,42 +58,93 @@ class FastTree(object):
 
         self.__index_by_key = {}
 
-    def __add(self, container, key, value):
-        with self.__mutex:
-            key_for_sorting = self.__key_for_sorting(value)
-            key_for_search = self.__key_for_search(value)
+    def __create_key_for_sorting(self, group):
+        prefix_for_sorting = not group
 
-            index = self.__index_by_key.pop(key, None)
-            if index is not None:
-                if key_for_sorting == self.__keys_for_sorting[index]:
-                    return self.__rows[index]
+        def key_for_sorting(item):
+            if self.__group_key_property is None:
+                return self.__key_for_sorting(item)
 
-                self.__rows.pop(index)
-                self.__keys_for_sorting.pop(index)
-                self.__keys_for_search.pop(index)
+            res = [prefix_for_sorting, self.__key_for_sorting(item)]
+            group_key = item[self.__group_key_property]
+            if group_key is None:
+                return res
+            group = self.__groups[group_key]
+            return self.__key_for_sorting_groups(group) + res
 
-            index = bisect(self.__keys_for_sorting, key_for_sorting)
-            self.__index_by_key[key] = index
+        return key_for_sorting
 
-            item = value if isinstance(value, FastTreeDict) else FastTreeDict(self.__edit, self.__edit, value)
+    def __create_add(self, group):
+        __key_for_sorting = self.__key_for_sorting_groups if group else self.__key_for_sorting_items
+        edit_ref = []
 
-            self.__rows.insert(index, item)
-            self.__keys_for_sorting.insert(index, key_for_sorting)
-            self.__keys_for_search.insert(index, key_for_search)
+        def add(container, key, value):
+            with self.__mutex:
+                key = group, key
+                key_for_sorting = __key_for_sorting(value)
+                key_for_search = self.__key_for_search(value)
 
-            return item
+                index = self.__index_by_key.pop(key, None)
+                if index is not None:
+                    if key_for_sorting == self.__keys_for_sorting[index]:
+                        return self.__rows[index]
 
-    def __remove(self, container, key):
-        with self.__mutex:
-            index = self.__index_by_key.pop(key, None)
-            if index is not None:
-                self.__rows.pop(index)
-                self.__keys_for_sorting.pop(index)
-                self.__keys_for_search.pop(index)
+                    if group:
+                        count = 1
 
-    def __edit(self, container, key, value):
-        self.__add(None, self.__key(container), container)
-        return value
+                        group_rows = self.__rows[index:index + count]
+                        group_keys_for_sorting = self.__keys_for_sorting[index:index + count]
+                        group_keys_for_search = self.__keys_for_search[index:index + count]
+
+                        self.__rows = self.__rows[:index] + self.__rows[index + count]
+                        self.__keys_for_sorting = self.__keys_for_sorting[:index] + self.__keys_for_sorting[index + count]
+                        self.__keys_for_search = self.__keys_for_search[:index] + self.__keys_for_search[index + count]
+                    else:
+                        self.__rows.pop(index)
+                        self.__keys_for_sorting.pop(index)
+                        self.__keys_for_search.pop(index)
+
+                index = bisect(self.__keys_for_sorting, key_for_sorting)
+                self.__index_by_key[key] = index
+
+                item = value if isinstance(value, FastTreeDict) else FastTreeDict(edit_ref[0], edit_ref[0], value)
+
+                if group:
+                    self.__rows = self.__rows[:index] + group_rows + self.__rows[index + count]
+                    self.__keys_for_sorting = self.__keys_for_sorting[:index] + group_keys_for_sorting + self.__keys_for_sorting[index + count]
+                    self.__keys_for_search = self.__keys_for_search[:index] + group_keys_for_search + self.__keys_for_search[index + count]
+                else:
+                    self.__rows.insert(index, item)
+                    self.__keys_for_sorting.insert(index, key_for_sorting)
+                    self.__keys_for_search.insert(index, key_for_search)
+
+                return item
+
+        def edit(container, key, value):
+            add(None, container[self.__key_property], container)
+            return value
+
+        edit_ref.append(edit)
+
+        return add
+
+    def __create_remove(self, group):
+        def remove(container, key):
+            with self.__mutex:
+                key = group, key
+                index = self.__index_by_key.pop(key, None)
+                if index is not None:
+                    if group:
+                        count = 1
+                        self.__rows = self.__rows[:index] + self.__rows[index + count]
+                        self.__keys_for_sorting = self.__keys_for_sorting[:index] + self.__keys_for_sorting[index + count]
+                        self.__keys_for_search = self.__keys_for_search[:index] + self.__keys_for_search[index + count]
+                    else:
+                        item = self.__rows.pop(index)
+                        self.__keys_for_sorting.pop(index)
+                        self.__keys_for_search.pop(index)
+
+        return remove
 
     def items(self):
         return self.__items
@@ -91,6 +152,6 @@ class FastTree(object):
     def groups(self):
         return self.__groups
 
-    def get_block(self, block_size, block_start, query, thread_count=0, min_rows_per_thread=1000):
+    def get_block(self, block_size, block_start, query, expanded_group_keys=[], thread_count=0, min_rows_per_thread=1000):
         with self.__mutex:
             return get_block(self.__rows, self.__keys_for_search, block_size, block_start, query, thread_count, min_rows_per_thread)
