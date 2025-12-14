@@ -6,10 +6,10 @@ __pycache__
 node_modules
 package-lock.json
 
-python/fast-tree-utils/build
 python/fast-tree-utils/*.tar.gz
 
-python/fast-tree/dist
-python/fast-tree/fast_tree.egg-info
+build
+dist
+*.egg-info
 
 cpp/build
